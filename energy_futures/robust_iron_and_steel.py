@@ -14,8 +14,8 @@ from pyomo.environ import (
 )
 import time
 
-data = pd.read_csv("data/iron_and_steel_csv.csv")[:33]
-plant_names = [i.replace("\xa0", "") for i in data["Plant"].values[1:]]
+data = pd.read_csv("data/iron_and_steel_csv.csv", skiprows=1)[:33]
+plant_names = [i.replace("\xa0", "") for i in data["PLANT"].values[1:]]
 plant_emissions = [
     float(i.replace(",", "")) for i in data["CO2 Emissions per plant (t/yr)"].values[1:]
 ]
@@ -32,7 +32,7 @@ for i in range(plants):
 x = {}
 for plant in plant_names:
     x["t"] = [-1e20, 1e20]
-    x[plant + ": Carbon Tax"] = [0, 100]
+    x[plant + ": Carbon Tax"] = [0, 1000]
     x[plant + ": Market Share"] = [0, 1]
 
 con_list = []
