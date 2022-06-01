@@ -64,12 +64,7 @@ def make_c(i):
     def c(x, p):
         CR, UC0, CO2, A0, LR = parse_params(p)
         carbon_tax, market_share, t = parse_vars(x)
-        CO2_captured = [CO2[j] * CR for j in range(plants)]
-        plant_cost_at_capture_rate = UC0 * CO2[i]
-        plant_ctax_impact_on_cost = plant_cost_at_capture_rate - (
-            carbon_tax[i] * CO2_captured[i]
-        )
-        return plant_ctax_impact_on_cost
+        return CO2[i] * (UC0 - CR * carbon_tax[i])
 
     return c
 
@@ -83,10 +78,8 @@ def make_c(i):
     def c(x, p):
         CR, UC0, CO2, A0, LR = parse_params(p)
         carbon_tax, market_share, t = parse_vars(x)
-        CO2_captured = [CO2[j] * CR for j in range(plants)]
-        all_captured = sum(CO2_captured)
-        plant_market_occupancy = CO2_captured[i] / all_captured
-        plant_improvement = market_share[i] - plant_market_occupancy
+        CO2_captured = [CO2[j] for j in range(plants)]
+        plant_improvement = market_share[i] - CO2_captured[i] / sum(CO2_captured)
         return plant_improvement
 
     return c
@@ -100,13 +93,7 @@ for i in range(plants):
 def minimum_improvement(x, p):
     CR, UC0, CO2, A0, LR = parse_params(p)
     carbon_tax, market_share, t = parse_vars(x)
-    CO2_captured = [CO2[j] * CR for j in range(plants)]
-    all_captured = sum(CO2_captured)
-    CO2_captured_end = [market_share[j] * all_captured for j in range(plants)]
-    all_CO2_captured = sum(CO2_captured_end)
-    A = A0 + all_CO2_captured
-    UC = UC0 * (A / A0) ** (-LR)
-    return 0.2 - ((UC0 - UC) / UC0)
+    return 0.2 - (1 - ((A0 + CR * sum(CO2) * sum(market_share)) / A0) ** (-LR))
 
 
 con_list += [minimum_improvement]
@@ -115,13 +102,7 @@ con_list += [minimum_improvement]
 def con(x, p):
     CR, UC0, CO2, A0, LR = parse_params(p)
     carbon_tax, market_share, t = parse_vars(x)
-    CO2_captured = [CO2[j] * CR for j in range(plants)]
-    all_captured = sum(CO2_captured)
-    CO2_captured_end = [market_share[j] * all_captured for j in range(plants)]
-    all_CO2_captured = sum(CO2_captured_end)
-    A = A0 + all_CO2_captured
-    UC = UC0 * (A / A0) ** (-LR)
-    return (UC0 - UC) - t
+    return (UC0 * (1 - ((A0 + CR * sum(CO2) * sum(market_share)) / A0) ** (-LR))) - t
 
 
 con_list += [con]
@@ -171,6 +152,7 @@ if term_con is TerminationCondition.infeasible:
 
 else:
     x_opt = value(m_upper.x_v[:])
+    print(x_opt)
     x_opt_nominal = x_opt
     while True:
         robust = True
