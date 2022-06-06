@@ -15,6 +15,7 @@ from pyomo.environ import (
     maximize,
 )
 import os
+import pickle
 import logging
 
 logging.getLogger("pyomo.core").setLevel(logging.ERROR)
@@ -38,17 +39,17 @@ boilers = len(boiler_names)
 
 
 p = {}
-p["Natural Gas LHV (MJ/kg)"] = {"val": 42, "unc": 1}
-p["Hydrogen LHV (MJ/kg)"] = {"val": 120, "unc": 1}
-p["Natural Gas Price (£/tonne)"] = {"val": 292, "unc": 1}
-p["Hydrogen Price (£/tonne)"] = {"val": 1800, "unc": 1}
+p["Natural Gas LHV (MJ/kg)"] = {"val": 42, "unc": 0.5}
+p["Hydrogen LHV (MJ/kg)"] = {"val": 120, "unc": 0.5}
+p["Natural Gas Price (£/tonne)"] = {"val": 292, "unc": 30}
+p["Hydrogen Price (£/tonne)"] = {"val": 1800, "unc": 100}
 p["Natural Gas Boiler Efficiency"] = {"val": 0.9, "unc": 0.05}
 p["Hydrogen Boiler Efficiency"] = {"val": 0.9, "unc": 0.05}
-p["Natural Gas kgCO2e/MWh"] = {"val": 200, "unc": 1}
-p["Hydrogen kgCO2e/MWh"] = {"val": 20, "unc": 1}
-p["A0"] = {"val": 96071.958, "unc": 10}
-p["LR"] = {"val": 0.07, "unc": 0.01}
-p["UC0"] = {"val": 1800, "unc": 10}
+p["Natural Gas kgCO2e/MWh"] = {"val": 200, "unc": 0.01}
+p["Hydrogen kgCO2e/MWh"] = {"val": 20, "unc": 0.01}
+p["A0"] = {"val": 96071.958, "unc": 0.001}
+p["LR"] = {"val": 0.07, "unc": 0.005}
+p["UC0"] = {"val": 1800, "unc": 50}
 
 for i in range(boilers):
     p[boiler_names[i] + ": CO2 Emissions from natural gas combustion (kg/yr)"] = {
@@ -325,3 +326,5 @@ else:
         x_opt = value(m_upper.x_v[:])
 
 print(res)
+with open("fuel_switching_results.pickle", "wb") as handle:
+    pickle.dump(res, handle)
