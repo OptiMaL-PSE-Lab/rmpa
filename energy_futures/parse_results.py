@@ -3,24 +3,27 @@ import matplotlib.pyplot as plt
 from robust_iron_and_steel_box import run_iron_and_steel_box
 from robust_iron_and_steel_ellipse import run_iron_and_steel_ellipse
 from robust_iron_and_steel_realistic import run_iron_and_steel_realistic
+import numpy as np 
+
+fig, axs = plt.subplots(1, 1)
+gamma = np.logspace(-2,2,10)
+rob = np.zeros(len(gamma))
+for i in range(len(gamma)):
+    res = run_iron_and_steel_realistic(1e-6,gamma[i])
+    nom = res["nominal_objective"]
+    rob[i] = res["robust_objective"]
+    rob = np.array([0]+list(np.cumsum(np.diff(rob))/rob[0]))*100
 
 
-# fig, axs = plt.subplots(1, 1)
-# axs.spines['right'].set_visible(False)
-# axs.spines['top'].set_visible(False)
-# axs.set_title("Iron and Steel - Realistic")
-# gamma = np.logspace(-1,2,10)
-# rob = np.zeros(len(gamma))
-# for i in range(len(gamma)):
-#     res = run_iron_and_steel_realistic(1e-6,gamma[i])
-#     nom = res["nominal_objective"]
-#     rob[i] = res["robust_objective"]
-#     rob = np.array([0]+list(np.cumsum(np.diff(rob))/rob[0]))*100
-# axs.plot(gamma, rob, c='k', lw=2)
-# axs.set_xlabel("$\Gamma$")
-# axs.set_ylabel("Increase in objective from nominal solution (%)")
-# axs.grid()
-# plt.savefig('outputs/realistic_iron_and_steel.pdf')
+prob = [(1-np.exp(-(gamma[i]**2)/2))*100 for i in range(len(gamma))]
+axs.plot(prob, rob, c='k', lw=2)
+
+
+
+axs.set_xlabel("Constraint violation probability (%)")
+axs.set_ylabel("Increase in objective from nominal solution (%)")
+axs.grid()
+plt.savefig('outputs/realistic_iron_and_steel.pdf')
 
 colors = ["k", "red", "blue", "green"]
 fig, axs = plt.subplots(1, 1)
@@ -36,6 +39,7 @@ n = 20
 per = 4
 percentages = [0.01,0.02,0.04,0.06]
 gamma = np.logspace(-2, 2, n)
+prob = [(1-np.exp(-(gamma[i]**2)/2))*100 for i in range(len(gamma))]
 rob = np.zeros(n)
 for i in range(per):
     for j in range(n):
@@ -44,9 +48,9 @@ for i in range(per):
         rob[j] = res["robust_objective"]
     rob = np.array([0] + list(np.cumsum(np.diff(rob)) / nom)) * 100
     label = "Parameter uncertainty (%): " + str(np.round(percentages[i], 2))
-    axs.plot(gamma, rob, c=colors[col_count], lw=2, label=label)
+    axs.plot(prob, rob, c=colors[col_count], lw=2, label=label)
     col_count += 1
-axs.set_xlabel("$\Gamma$")
+axs.set_xlabel("Constraint violation probability (%)")
 axs.set_ylabel("Increase in objective from nominal solution (%)")
 axs.grid()
 axs.set_xscale("log")
