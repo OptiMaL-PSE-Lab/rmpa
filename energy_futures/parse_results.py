@@ -32,9 +32,9 @@ col_count = 0
 # per = 4
 # percentages = np.linspace(0.0001, 0.06, per)
 # gamma = np.linspace(0, 40, n)
-n = 10
-per = 1
-percentages = [0.05]
+n = 20
+per = 4
+percentages = [0.01,0.02,0.04,0.06]
 gamma = np.logspace(-2, 2, n)
 rob = np.zeros(n)
 for i in range(per):
@@ -43,10 +43,7 @@ for i in range(per):
         nom = res["nominal_objective"]
         rob[j] = res["robust_objective"]
     rob = np.array([0] + list(np.cumsum(np.diff(rob)) / nom)) * 100
-    if i != 0:
-        label = "Parameter uncertainty (%): " + str(np.round(percentages[i], 2))
-    else:
-        label = "Parameter uncertainty (%): " + str(0)
+    label = "Parameter uncertainty (%): " + str(np.round(percentages[i], 2))
     axs.plot(gamma, rob, c=colors[col_count], lw=2, label=label)
     col_count += 1
 axs.set_xlabel("$\Gamma$")

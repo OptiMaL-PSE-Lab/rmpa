@@ -1,0 +1,185 @@
+
+CondaValueError: prefix already exists: /rds/general/user/trs20/home/anaconda3/envs/energy_futures_env
+
+Traceback (most recent call last):
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/parse_results_mpi.py", line 3, in <module>
+Traceback (most recent call last):
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/parse_results_mpi.py", line 3, in <module>
+Traceback (most recent call last):
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/parse_results_mpi.py", line 3, in <module>
+    from robust_iron_and_steel_box_mpi import run_iron_and_steel_box
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/robust_iron_and_steel_box_mpi.py", line 205
+    return res
+IndentationError: unexpected indent
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/parse_results_mpi.py", line 3, in <module>
+    from robust_iron_and_steel_box_mpi import run_iron_and_steel_box
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/robust_iron_and_steel_box_mpi.py", line 205
+    return res
+IndentationError: unexpected indent
+Traceback (most recent call last):
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/parse_results_mpi.py", line 3, in <module>
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/parse_results_mpi.py", line 3, in <module>
+Traceback (most recent call last):
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/parse_results_mpi.py", line 3, in <module>
+    from robust_iron_and_steel_box_mpi import run_iron_and_steel_box
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/robust_iron_and_steel_box_mpi.py", line 205
+    return res
+IndentationError: unexpected indent
+    from robust_iron_and_steel_box_mpi import run_iron_and_steel_box
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/robust_iron_and_steel_box_mpi.py", line 205
+    return res
+IndentationError: unexpected indent
+Traceback (most recent call last):
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/parse_results_mpi.py", line 3, in <module>
+    from robust_iron_and_steel_box_mpi import run_iron_and_steel_box
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/robust_iron_and_steel_box_mpi.py", line 205
+    return res
+IndentationError: unexpected indent
+    from robust_iron_and_steel_box_mpi import run_iron_and_steel_box
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/robust_iron_and_steel_box_mpi.py", line 205
+    return res
+IndentationError: unexpected indent
+Traceback (most recent call last):
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/parse_results_mpi.py", line 3, in <module>
+Traceback (most recent call last):
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/parse_results_mpi.py", line 3, in <module>
+Traceback (most recent call last):
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/parse_results_mpi.py", line 3, in <module>
+Traceback (most recent call last):
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/parse_results_mpi.py", line 3, in <module>
+    from robust_iron_and_steel_box_mpi import run_iron_and_steel_box
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/robust_iron_and_steel_box_mpi.py", line 205
+    return res
+IndentationError: unexpected indent
+    from robust_iron_and_steel_box_mpi import run_iron_and_steel_box
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/robust_iron_and_steel_box_mpi.py", line 205
+    return res
+IndentationError: unexpected indent
+    from robust_iron_and_steel_box_mpi import run_iron_and_steel_box
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/robust_iron_and_steel_box_mpi.py", line 205
+    return res
+IndentationError: unexpected indent
+    from robust_iron_and_steel_box_mpi import run_iron_and_steel_box
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/robust_iron_and_steel_box_mpi.py", line 205
+    return res
+IndentationError: unexpected indent
+Traceback (most recent call last):
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/parse_results_mpi.py", line 3, in <module>
+Traceback (most recent call last):
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/parse_results_mpi.py", line 3, in <module>
+Traceback (most recent call last):
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/parse_results_mpi.py", line 3, in <module>
+    from robust_iron_and_steel_box_mpi import run_iron_and_steel_box
+    from robust_iron_and_steel_box_mpi import run_iron_and_steel_box
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/robust_iron_and_steel_box_mpi.py", line 205
+    return res
+IndentationError: unexpected indent
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/robust_iron_and_steel_box_mpi.py", line 205
+    return res
+IndentationError: unexpected indent
+    from robust_iron_and_steel_box_mpi import run_iron_and_steel_box
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/robust_iron_and_steel_box_mpi.py", line 205
+    return res
+IndentationError: unexpected indent
+    from robust_iron_and_steel_box_mpi import run_iron_and_steel_box
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/robust_iron_and_steel_box_mpi.py", line 205
+    return res
+IndentationError: unexpected indent
+    from robust_iron_and_steel_box_mpi import run_iron_and_steel_box
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/robust_iron_and_steel_box_mpi.py", line 205
+    return res
+IndentationError: unexpected indent
+Traceback (most recent call last):
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/parse_results_mpi.py", line 3, in <module>
+    from robust_iron_and_steel_box_mpi import run_iron_and_steel_box
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/robust_iron_and_steel_box_mpi.py", line 205
+    return res
+IndentationError: unexpected indent
+
+CondaValueError: prefix already exists: /rds/general/user/trs20/home/anaconda3/envs/energy_futures_env
+
+Traceback (most recent call last):
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/parse_results_mpi.py", line 5, in <module>
+Traceback (most recent call last):
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/parse_results_mpi.py", line 5, in <module>
+Traceback (most recent call last):
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/parse_results_mpi.py", line 5, in <module>
+Traceback (most recent call last):
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/parse_results_mpi.py", line 5, in <module>
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/parse_results_mpi.py", line 5, in <module>
+Traceback (most recent call last):
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/parse_results_mpi.py", line 5, in <module>
+Traceback (most recent call last):
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/parse_results_mpi.py", line 5, in <module>
+Traceback (most recent call last):
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/parse_results_mpi.py", line 5, in <module>
+Traceback (most recent call last):
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/parse_results_mpi.py", line 5, in <module>
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/parse_results_mpi.py", line 5, in <module>
+Traceback (most recent call last):
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/parse_results_mpi.py", line 5, in <module>
+Traceback (most recent call last):
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/parse_results_mpi.py", line 5, in <module>
+Traceback (most recent call last):
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/parse_results_mpi.py", line 5, in <module>
+Traceback (most recent call last):
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/parse_results_mpi.py", line 5, in <module>
+Traceback (most recent call last):
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/parse_results_mpi.py", line 5, in <module>
+Traceback (most recent call last):
+  File "/rds/general/user/trs20/home/robust_market_allocation/energy_futures/parse_results_mpi.py", line 5, in <module>
+    res = run_iron_and_steel_box(percentages[i],1e-6)
+    res = run_iron_and_steel_box(percentages[i],1e-6)
+    res = run_iron_and_steel_box(percentages[i],1e-6)
+NameError: name 'percentages' is not defined
+NameError: name 'percentages' is not defined
+NameError: name 'percentages' is not defined
+    res = run_iron_and_steel_box(percentages[i],1e-6)
+    res = run_iron_and_steel_box(percentages[i],1e-6)
+    res = run_iron_and_steel_box(percentages[i],1e-6)
+    res = run_iron_and_steel_box(percentages[i],1e-6)
+NameError: name 'percentages' is not defined
+NameError: name 'percentages' is not defined
+    res = run_iron_and_steel_box(percentages[i],1e-6)
+NameError: name 'percentages' is not defined
+    res = run_iron_and_steel_box(percentages[i],1e-6)
+    res = run_iron_and_steel_box(percentages[i],1e-6)
+    res = run_iron_and_steel_box(percentages[i],1e-6)
+    res = run_iron_and_steel_box(percentages[i],1e-6)
+NameError: name 'percentages' is not defined
+    res = run_iron_and_steel_box(percentages[i],1e-6)
+NameError: name 'percentages' is not defined
+NameError: name 'percentages' is not defined
+NameError: name 'percentages' is not defined
+NameError: name 'percentages' is not defined
+NameError: name 'percentages' is not defined
+NameError: name 'percentages' is not defined
+    res = run_iron_and_steel_box(percentages[i],1e-6)
+    res = run_iron_and_steel_box(percentages[i],1e-6)
+NameError: name 'percentages' is not defined
+NameError: name 'percentages' is not defined
+    res = run_iron_and_steel_box(percentages[i],1e-6)
+NameError: name 'percentages' is not defined
+
+CondaValueError: prefix already exists: /rds/general/user/trs20/home/anaconda3/envs/energy_futures_env
+
+16 0
+16 2
+16 8
+16 9
+16 10
+16 1
+16 3
+16 4
+16 12
+16 5
+16 11
+16 6
+16 14
+16 7
+16 13
+16 15

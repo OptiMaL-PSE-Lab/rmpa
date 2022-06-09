@@ -128,7 +128,7 @@ def run_iron_and_steel_realistic(epsilon,g):
         param_vars = [m.p_v[str(i)] for i in p.keys()]
         for i in range(len(param_vars)):
             if upper[i]-lower[i] > 1e-20:
-                p_n = (((param_vars[i]-upper[i])/(upper[i]-lower[i]))*2)-1
+                p_n = (((param_vars[i]-lower[i])/(upper[i]-lower[i]))*2)-1
                 sum_p += p_n**2 
         m.ellipse = Constraint(expr= sqrt(sum_p) <= g)
         m.obj = Objective(expr=con(x_opt, param_vars), sense=maximize)

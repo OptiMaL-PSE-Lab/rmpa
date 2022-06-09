@@ -1,0 +1,15 @@
+#!/bin/bash
+#PBS -N rma_multithread
+#PBS -j oe 
+#PBS -o rma_multithread.out
+#PBS -e rma_multithread.err
+#PBS -lselect=1:ncpus=16:mem=16gb:mpiprocs=16
+#PBS -lwalltime=1:00:00
+
+module load mpi
+module load anaconda3/personal
+
+cd $PBS_O_WORKDIR
+conda env create -f environment.yml 
+source activate energy_futures_env
+mpiexec python3 energy_futures/parse_results_mpi.py
