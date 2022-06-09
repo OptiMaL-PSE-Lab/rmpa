@@ -263,7 +263,7 @@ def build_lower_problem(con):
     return m
 
 
-epsilon = 1e-6
+epsilon = 1e-4
 solver = "ipopt"
 m_upper = ConcreteModel()
 m_upper.x = Set(initialize=x.keys())
@@ -275,33 +275,47 @@ for con in con_list:
     m_upper.cons.add(expr=con(x_vars, p_nominal) <= 0)
 m_upper.obj = Objective(expr=obj(x_vars), sense=minimize)
 res = SolverFactory(solver).solve(m_upper)
+nominal_obj = value(m_upper.obj)
 term_con = res.solver.termination_condition
+upper_iteration = 0
 if term_con is TerminationCondition.infeasible:
-    print("Problem is robustly infeasible...")
-    feasible = False
+    print("Problem is nominally infeasible...")
     res = {}
     res["robust_solution"] = None
     res["nominal_solution"] = None
+    res["robust_objective"] = None
+    res["nominal_objective"] = None
 
 else:
     x_opt = value(m_upper.x_v[:])
     x_opt_nominal = x_opt
     while True:
+        x_opt = value(m_upper.x_v[:])
         robust = True
+        max_con = -1e30
         for con in con_list:
             m_lower = build_lower_problem(con)
             try:
                 SolverFactory(solver).solve(m_lower)
                 p_opt = value(m_lower.p_v[:])
-                print("Constraint violation: ", value(m_lower.obj), end="\r")
                 for k in range(len(p_opt)):
                     if p_opt[k] is None:
                         p_opt[k] = p_nominal[k]
                 if value(m_lower.obj) > epsilon:
                     robust = False
+                    print(value(m_lower.obj))
                     m_upper.cons.add(expr=con(x_vars, p_opt) <= 0)
+                if value(m_lower.obj) > max_con:
+                    max_con = value(m_lower.obj)
             except ValueError:
                 continue
+        upper_iteration += 1
+        print(
+            "Upper iteration: ",
+            upper_iteration,
+            "\t Max constraint violation: ",
+            max_con,
+        )
         if robust is True:
             res = {}
             robust_solution = {}
@@ -309,9 +323,13 @@ else:
             for v in range(len(x)):
                 robust_solution[list(x.keys())[v]] = x_opt[v]
                 nominal_solution[list(x.keys())[v]] = x_opt_nominal[v]
+            print("Problem is robustly feasible")
             res["robust_solution"] = robust_solution
             res["nominal_solution"] = nominal_solution
+            res["robust_objective"] = value(m_upper.obj)
+            res["nominal_objective"] = nominal_obj
             break
+        print("Solving upper level problem")
         res = SolverFactory(solver).solve(m_upper)
         term_con = res.solver.termination_condition
         if term_con is TerminationCondition.infeasible:
@@ -322,9 +340,9 @@ else:
                 nominal_solution[list(x.keys())[v]] = x_opt_nominal[v]
             res["robust_solution"] = None
             res["nominal_solution"] = x_opt_nominal
+            res["robust_objective"] = None
+            res["nominal_objective"] = nominal_obj
             break
-        x_opt = value(m_upper.x_v[:])
+
 
 print(res)
-with open("fuel_switching_results.pickle", "wb") as handle:
-    pickle.dump(res, handle)
