@@ -1,0 +1,15 @@
+#!/bin/bash
+#PBS -N ellipse
+#PBS -j oe 
+#PBS -o ellipse.out
+#PBS -e ellipse.err
+#PBS -lselect=1:ncpus=16:mem=32gb
+#PBS -lwalltime=4:00:00
+
+module load anaconda3/personal
+
+cd $PBS_O_WORKDIR
+conda env create -f environment.yml 
+source activate energy_futures_env
+python3 energy_futures/parse_results.py
+python3 
