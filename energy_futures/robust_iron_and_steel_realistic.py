@@ -164,7 +164,10 @@ def run_iron_and_steel_realistic(epsilon,g):
             x_opt = value(m_upper.x_v[:])
             robust = True
             max_con = -1E30
+            con_count = 0 
             for con in con_list:
+                con_count += 1
+                print('upper problem: '+str(upper_iteration)+'  subproblem: '+str(con_count))
                 m_lower = build_lower_problem(con)
                 try:
                     SolverFactory(solver).solve(m_lower)

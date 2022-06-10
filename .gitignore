@@ -3,3 +3,4 @@ slides/
 preprint/
 paper/
 __pycache__
+*/.DS_Store
