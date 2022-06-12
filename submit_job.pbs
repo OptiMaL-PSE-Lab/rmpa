@@ -1,8 +1,8 @@
 #!/bin/bash
 #PBS -N ellipse
 #PBS -j oe 
-#PBS -o ellipse.out
-#PBS -e ellipse.err
+#PBS -o outputs/ellipse.out
+#PBS -e outputs/ellipse.err
 #PBS -lselect=1:ncpus=16:mem=32gb
 #PBS -lwalltime=8:00:00
 

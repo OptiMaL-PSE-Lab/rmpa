@@ -19,7 +19,6 @@ import logging
 
 def run_iron_and_steel_box(u,epsilon,tag):
     logging.getLogger("pyomo.core").setLevel(logging.ERROR)
-    os.system("clear")
 
     data = pd.read_csv("data/iron_and_steel_csv.csv", skiprows=1)[:33]
     plant_names = [i.replace("\xa0", "") for i in data["PLANT"].values[1:]]
@@ -72,7 +71,7 @@ def run_iron_and_steel_box(u,epsilon,tag):
                 "val": plant_emissions[i],
                 "unc": 0,
             }
-
+    print('PARAMETERS:',len(p))
     x = {}
     x["t"] = [-1e20, 1e20]
     for plant in plant_names:
