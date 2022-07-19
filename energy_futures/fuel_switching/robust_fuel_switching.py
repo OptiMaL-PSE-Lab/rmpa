@@ -1,5 +1,5 @@
 import pandas as pd
-
+from tqdm import tqdm
 from pyomo.environ import (
     log,
     TerminationCondition,
@@ -207,7 +207,7 @@ def c(x, p):
     U = [S[j] * sum(I) for j in range(boilers)]
     A = A0 + sum(U)
     UC = UC0 * (A / A0) ** (-LR)
-    return (UC0 - UC) / UC0 - 0.04
+    return (UC0 - UC) / UC0 - 0.04736
 
 
 con_list += [c]
@@ -235,15 +235,15 @@ def c(x, p):
     U = [S[j] * sum(I) for j in range(boilers)]
     A = A0 + sum(U)
     UC = UC0 * (A / A0) ** (-LR)
-    return (UC0 - UC) - t
+    return t-(UC0 - UC)
 
 
 con_list += [c]
 
 
 def obj(x):
-    t = x[0]
-    return t
+    O, S, t = parse_vars(x)
+    return -t
 
 
 def var_bounds(m, i):
@@ -293,7 +293,7 @@ else:
         x_opt = value(m_upper.x_v[:])
         robust = True
         max_con = -1e30
-        for con in con_list:
+        for con in tqdm(con_list):
             m_lower = build_lower_problem(con)
             try:
                 SolverFactory(solver).solve(m_lower)

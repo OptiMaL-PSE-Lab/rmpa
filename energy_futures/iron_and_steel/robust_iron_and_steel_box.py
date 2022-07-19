@@ -166,6 +166,7 @@ def run_iron_and_steel_box(u,epsilon,tag):
     for con in con_list:
         m_upper.cons.add(expr=con(x_vars, p_nominal) <= 0)
     m_upper.obj = Objective(expr=obj(x_vars), sense=minimize)
+
     res = SolverFactory(solver).solve(m_upper)
     nominal_obj = value(m_upper.obj)
     term_con = res.solver.termination_condition
