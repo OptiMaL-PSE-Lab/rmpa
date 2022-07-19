@@ -113,15 +113,13 @@ def iron_and_steel(p_list):
 
 data = pd.read_csv("data/iron_and_steel_csv.csv", skiprows=1)[:33]
 plant_names = [i.replace("\xa0", "") for i in data["PLANT"].values[1:]]
+
 plant_emissions = [
     float(i.replace(",", ""))
     for i in data["CO2 Emissions per plant (t/yr)"].values[1:]
 ]
 
 plants = len(plant_names)
-
-
-
 
 
 
@@ -137,11 +135,12 @@ for i in range(100):
         p[plant_names[i] + ": CO2 Emissions"] = {
             "val": plant_emissions[i]
         }
+    print(p)
     p_list.append(p)
 
 
-m = iron_and_steel(p_list)
+# m = iron_and_steel(p_list)
 
-print(value(m.x_v[:]))
-print(value(m.obj))
+# print(value(m.x_v[:]))
+# print(value(m.obj))
 
