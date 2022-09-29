@@ -9,74 +9,74 @@ import numpy as np
 import pickle 
 
 
-g_plot = np.linspace(0.1,5,100)
-p_plot = np.exp(-(g_plot**2)/2)*100
-fig,axs = plt.subplots(1,1)
-axs.spines["right"].set_visible(False)
-axs.spines["top"].set_visible(False)
-axs.set_xlabel('$\Omega$')
-axs.set_ylabel('Probability of constraint violation (%)')
-axs.plot(g_plot,p_plot,c='k',lw=2)
-axs.grid()
-axs.set_yscale('log')
-plt.savefig('outputs/conversion.pdf')
+# g_plot = np.linspace(0.1,5,100)
+# p_plot = np.exp(-(g_plot**2)/2)*100
+# fig,axs = plt.subplots(1,1)
+# axs.spines["right"].set_visible(False)
+# axs.spines["top"].set_visible(False)
+# axs.set_xlabel('$\Omega$')
+# axs.set_ylabel('Probability of constraint violation (%)')
+# axs.plot(g_plot,p_plot,c='k',lw=2)
+# axs.grid()
+# axs.set_yscale('log')
+# plt.savefig('outputs/conversion.pdf')
 
 
 
-colors = ["k", "red", "blue", "green"]
-fig, axs = plt.subplots(1, 1)
-axs.spines["right"].set_visible(False)
-axs.spines["top"].set_visible(False)
-axs.set_title("Iron and Steel - Ellipse")
-col_count = 0
-n = 20
-per = 4
-percentages = [0.01,0.02,0.04,0.06]
-gamma = np.linspace(0.1, 5, n)
-prob = [(np.exp(-(gamma[i]**2)/2))*100 for i in range(len(gamma))]
-rob = np.zeros(n)
-for i in range(per):
-    for j in range(n):
-        res = run_iron_and_steel_ellipse(percentages[i], 1e-6, gamma[j])
-        nom = res["nominal_objective"]
-        rob[j] = res["robust_objective"]
-    rob = np.array([0] + list(np.cumsum(np.diff(rob)) / nom)) * 100
-    label = "Overall uncertainty (%): " + str(100*np.round(percentages[i], 2))
-    axs.plot(prob, rob, c=colors[col_count], lw=2, label=label)
-    col_count += 1
-axs.set_xlabel("Constraint violation probability (%)")
-axs.set_ylabel("Increase in objective from nominal solution (%)")
-axs.grid()
-axs.set_xscale("log")
-axs.legend()
-fig.savefig("outputs/ellipse_iron_and_steel_prob.pdf")
+# colors = ["k", "red", "blue", "green"]
+# fig, axs = plt.subplots(1, 1)
+# axs.spines["right"].set_visible(False)
+# axs.spines["top"].set_visible(False)
+# axs.set_title("Iron and Steel - Ellipse")
+# col_count = 0
+# n = 20
+# per = 4
+# percentages = [0.01,0.02,0.04,0.06]
+# gamma = np.linspace(0.1, 5, n)
+# prob = [(np.exp(-(gamma[i]**2)/2))*100 for i in range(len(gamma))]
+# rob = np.zeros(n)
+# for i in range(per):
+#     for j in range(n):
+#         res = run_iron_and_steel_ellipse(percentages[i], 1e-6, gamma[j])
+#         nom = res["nominal_objective"]
+#         rob[j] = res["robust_objective"]
+#     rob = np.array([0] + list(np.cumsum(np.diff(rob)) / nom)) * 100
+#     label = "Overall uncertainty (%): " + str(100*np.round(percentages[i], 2))
+#     axs.plot(prob, rob, c=colors[col_count], lw=2, label=label)
+#     col_count += 1
+# axs.set_xlabel("Constraint violation probability (%)")
+# axs.set_ylabel("Increase in objective from nominal solution (%)")
+# axs.grid()
+# axs.set_xscale("log")
+# axs.legend()
+# fig.savefig("outputs/ellipse_iron_and_steel_prob.pdf")
 
 
-colors = ["k", "red", "blue", "green"]
-fig, axs = plt.subplots(1, 1)
-axs.spines["right"].set_visible(False)
-axs.spines["top"].set_visible(False)
-axs.set_title("Iron and Steel - Ellipse")
-col_count = 0
-n = 20
-per = 4
-percentages = [0.01,0.02,0.04,0.06]
-gamma = np.linspace(0.1,5, n)
-rob = np.zeros(n)
-for i in range(per):
-    for j in range(n):
-        res = run_iron_and_steel_ellipse(percentages[i], 1e-6, gamma[j])
-        nom = res["nominal_objective"]
-        rob[j] = res["robust_objective"]
-    rob = np.array([0] + list(np.cumsum(np.diff(rob)) / nom)) * 100
-    label = "Parameter uncertainty (%): " + str(np.round(percentages[i], 2))
-    axs.plot(gamma, rob, c=colors[col_count], lw=2, label=label)
-    col_count += 1
-axs.set_xlabel("$\Omega$")
-axs.set_ylabel("Increase in objective from nominal solution (%)")
-axs.grid()
-axs.legend()
-fig.savefig("outputs/ellipse_iron_and_steel_omega.pdf")
+# colors = ["k", "red", "blue", "green"]
+# fig, axs = plt.subplots(1, 1)
+# axs.spines["right"].set_visible(False)
+# axs.spines["top"].set_visible(False)
+# axs.set_title("Iron and Steel - Ellipse")
+# col_count = 0
+# n = 20
+# per = 4
+# percentages = [0.01,0.02,0.04,0.06]
+# gamma = np.linspace(0.1,5, n)
+# rob = np.zeros(n)
+# for i in range(per):
+#     for j in range(n):
+#         res = run_iron_and_steel_ellipse(percentages[i], 1e-6, gamma[j])
+#         nom = res["nominal_objective"]
+#         rob[j] = res["robust_objective"]
+#     rob = np.array([0] + list(np.cumsum(np.diff(rob)) / nom)) * 100
+#     label = "Parameter uncertainty (%): " + str(np.round(percentages[i], 2))
+#     axs.plot(gamma, rob, c=colors[col_count], lw=2, label=label)
+#     col_count += 1
+# axs.set_xlabel("$\Omega$")
+# axs.set_ylabel("Increase in objective from nominal solution (%)")
+# axs.grid()
+# axs.legend()
+# fig.savefig("outputs/ellipse_iron_and_steel_omega.pdf")
 
 
 
