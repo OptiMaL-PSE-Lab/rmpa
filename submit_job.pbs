@@ -11,4 +11,4 @@ module load anaconda3/personal
 cd $PBS_O_WORKDIR
 conda env create -f environment.yml 
 source activate energy_futures_env
-python3 energy_futures/parse_results.py
+python3 rmpa/fuel_switching/robust_fuel_switching.py
