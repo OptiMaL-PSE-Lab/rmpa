@@ -51,7 +51,7 @@ def run_fuel_switching_box(percen,epsilon,tag):
     p["Natural Gas Boiler Efficiency"] = {"val": 0.9}
     p["Hydrogen Boiler Efficiency"] = {"val": 0.9}
     p["Natural Gas kgCO2e/MWh"] = {"val": 200}
-    p["Hydrogen kgCO2e/MWh"] = {"val": 20}
+    p["Hydrogen (kgCO2e/MWh)"] = {"val": 20}
     p["A0"] = {"val": 96071.958}
     p["Learning Rate"] = {"val": 0.07}
     p["UC0"] = {"val": 1800}
@@ -80,15 +80,9 @@ def run_fuel_switching_box(percen,epsilon,tag):
     if tag == 'Learning Rate':
         p['Learning Rate']['unc'] = p['Learning Rate']['val'] * percen
 
-    if tag == 'Natural Gas Price (£/tonne)':
-        p['Natural Gas Price (£/tonne)']['unc'] = p['Natural Gas Price (£/tonne)']['val'] * percen
+    if tag == 'Hydrogen (kgCO2e/MWh)':
+        p['Hydrogen (kgCO2e/MWh)']['unc'] = p['Hydrogen (kgCO2e/MWh)']['val'] * percen
 
-    if tag == 'Hydrogen Price (£/tonne)':
-        p['Hydrogen Price (£/tonne)']['unc'] = p['Hydrogen Price (£/tonne)']['val'] * percen
-
-    if tag == 'Natural Gas Boiler Efficiency':
-        p['Natural Gas Boiler Efficiency']['unc'] = p['Natural Gas Boiler Efficiency']['val'] * percen
-        
     if tag == 'Hydrogen Boiler Efficiency':
         p['Hydrogen Boiler Efficiency']['unc'] = p['Hydrogen Boiler Efficiency']['val'] * percen
 
@@ -314,7 +308,6 @@ def run_fuel_switching_box(percen,epsilon,tag):
             for k in range(len(p_opt)):
                 if p_opt[k] is None:
                     p_opt[k] = p_nominal[k]
-            print(value(m.obj))
             if value(m.obj) > epsilon:
                 return [value(m.obj),p_opt]
             else:
@@ -322,7 +315,7 @@ def run_fuel_switching_box(percen,epsilon,tag):
         except ValueError:
             return [None]
 
-    pool = mp.Pool(mp.cpu_count() - 2)
+    pool = mp.Pool(mp.cpu_count())
     while True:
     # for it in range(1):
         x_opt = value(m_upper.x_v[:])
@@ -370,9 +363,10 @@ def run_fuel_switching_box(percen,epsilon,tag):
             res["robust_objective"] = None
             res["nominal_objective"] = nominal_obj
             break
+    return res 
 
 
-tags = ['All Parameters','Learning Rate','Natural Gas Price (£/tonne)','Hydrogen Price (£/tonne)','Natural Gas Boiler Efficiency','Hydrogen Boiler Efficiency']
+tags = ['All Parameters','Learning Rate','Hydrogen Boiler Efficiency','Hydrogen (kgCO2e/MWh)']
 colors = ['k','red','blue','green','orange']
 fig, axs = plt.subplots(1, 1)
 axs.spines['right'].set_visible(False)
@@ -380,15 +374,23 @@ axs.spines['top'].set_visible(False)
 #axs.set_title("Iron and Steel - Cartesian Product of Intervals")
 col_count = 0
 for tag_name in tags:
-    n = 50
-    percentages = np.linspace(0.0001, 0.2, n)
+    n = 20
+    percentages = np.linspace(0.0, 0.2, n)
     rob = np.zeros(n)
     for i in range(n):
+        rob[i] = None
+    rob[0] = 0 
+
+    for i in range(1,n):
         res = run_fuel_switching_box(percentages[i],1e-4,tag=tag_name)
+        print(res)
         nom = res["nominal_objective"]
-        print(nom)
-        rob[i] = res["robust_objective"]
-    rob = np.array([0]+list(np.cumsum(np.diff(rob))/rob[0]))*100
+        if res["robust_objective"] != None:
+            rob[i] = -((res["robust_objective"]/nom)-1)*100
+        else:
+            break 
+        axs.plot(percentages[:i+1]*100, rob[:i+1], c=colors[col_count], lw=2,label=tag_name)
+        plt.savefig('outputs/box_fuel_switching.png') 
     axs.plot(percentages*100, rob, c=colors[col_count], lw=2,label=tag_name)
     plt.savefig('outputs/box_fuel_switching.pdf') 
     invalid_index = [] 
@@ -396,8 +398,6 @@ for tag_name in tags:
     for i in range(len(percentages)):
         if rob[i] < 0:
             invalid_index.append(i)
-
-
     rob = np.delete(rob,invalid_index)
     print(rob)
     col_count += 1
