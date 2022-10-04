@@ -15,11 +15,14 @@ from pyomo.environ import (
     value,
     maximize,
 )
+import time
 import matplotlib.pyplot as plt 
 import os
 import pickle
 import multiprocessing as mp
 import logging
+import platform
+print(platform.processor())
 
 logging.getLogger("pyomo.core").setLevel(logging.ERROR)
 os.system("clear")
@@ -55,16 +58,6 @@ def run_fuel_switching_box(percen,epsilon,tag):
     p["A0"] = {"val": 96071.958}
     p["Learning Rate"] = {"val": 0.07}
     p["UC0"] = {"val": 1800}
-
-    for i in range(boilers):
-        p[boiler_names[i] + ": CO2 Emissions from natural gas combustion (kg/yr)"] = {
-            "val": boiler_emissions[i]
-        }
-    for i in range(boilers):
-        p[
-            boiler_names[i]
-            + ": Price of steam produced from Natural gas combustion (£/MWh)"
-        ] = {"val": boiler_cost_of_steam[i]}
     for i in range(boilers):
         p[boiler_names[i] + ": Thermal Energy required from fuel (MJ/year)"] = {
             "val": boiler_energy_required[i]
@@ -76,15 +69,14 @@ def run_fuel_switching_box(percen,epsilon,tag):
     if tag == 'All Parameters':
         for k,v in p.items():
             p[k]['unc'] = p[k]['val'] * percen
+    elif tag == 'Learning Rate':
+        p[tag]['unc'] = p[tag]['val'] * percen
 
-    if tag == 'Learning Rate':
-        p['Learning Rate']['unc'] = p['Learning Rate']['val'] * percen
+    elif tag == 'Reported Energy Required':
+        k = list(p.keys())[:11]
+        for ki in k:
+            p[ki]['unc'] = p[ki]['val'] * percen
 
-    if tag == 'Hydrogen (kgCO2e/MWh)':
-        p['Hydrogen (kgCO2e/MWh)']['unc'] = p['Hydrogen (kgCO2e/MWh)']['val'] * percen
-
-    if tag == 'Hydrogen Boiler Efficiency':
-        p['Hydrogen Boiler Efficiency']['unc'] = p['Hydrogen Boiler Efficiency']['val'] * percen
 
     x = {}
     x["t"] = [-1e20, 1e20]
@@ -116,10 +108,6 @@ def run_fuel_switching_box(percen,epsilon,tag):
         LR = -log(1 - p[9]) / log(2)
         UC0 = p[10]
         ind = 11
-        boiler_CO2 = p[ind : ind + boilers]
-        ind += boilers
-        boiler_steam_price = p[ind : ind + boilers]
-        ind += boilers
         boiler_energy = p[ind : ind + boilers]
         return (
             NG_LHV,
@@ -133,8 +121,6 @@ def run_fuel_switching_box(percen,epsilon,tag):
             A0,
             LR,
             UC0,
-            boiler_CO2,
-            boiler_steam_price,
             boiler_energy,
         )
 
@@ -153,8 +139,6 @@ def run_fuel_switching_box(percen,epsilon,tag):
                 A0,
                 LR,
                 UC0,
-                C,
-                D,
                 E,
             ) = parse_params(p)
             O, S, t = parse_vars(x)
@@ -163,9 +147,43 @@ def run_fuel_switching_box(percen,epsilon,tag):
             I = H / 1000
             K = I * UC0
             M = K / J
-            return (M - O[i]) - D[i]
+            D = 3.6*(NG_price/NG_LHV)
+            return (M - O[i]) - D
 
         return c
+
+
+    # for i in range(boilers):
+    #     c = make_c(i)
+    #     con_list += [c]
+
+    # def make_c(i):
+    #     def c(x, p):
+    #         (
+    #             NG_LHV,
+    #             H_LHV,
+    #             NG_price,
+    #             H_price,
+    #             NG_eff,
+    #             H_eff,
+    #             NG_rho,
+    #             H_rho,
+    #             A0,
+    #             LR,
+    #             UC0,
+    #             E,
+    #         ) = parse_params(p)
+    #         O, S, t = parse_vars(x)
+    #         J = E[i] / (3600 * H_eff)
+    #         H = E[i] / H_LHV
+    #         I = H / 1000
+    #         K = I * UC0
+    #         M = K / J
+    #         Co = ((E[i]/NG_eff)/3600)*NG_rho
+    #         Co_H = ((E[i]/3600)*H_eff*H_rho)
+    #         return Co_H-Co
+
+    #     return c
 
 
     for i in range(boilers):
@@ -187,8 +205,6 @@ def run_fuel_switching_box(percen,epsilon,tag):
                 A0,
                 LR,
                 UC0,
-                C,
-                D,
                 E,
             ) = parse_params(p)
             O, S, t = parse_vars(x)
@@ -217,8 +233,6 @@ def run_fuel_switching_box(percen,epsilon,tag):
             A0,
             LR,
             UC0,
-            C,
-            D,
             E,
         ) = parse_params(p)
         O, S, t = parse_vars(x)
@@ -245,8 +259,6 @@ def run_fuel_switching_box(percen,epsilon,tag):
             A0,
             LR,
             UC0,
-            C,
-            D,
             E,
         ) = parse_params(p)
         O, S, t = parse_vars(x)
@@ -273,7 +285,7 @@ def run_fuel_switching_box(percen,epsilon,tag):
         return (p[i]["val"] - p[i]["unc"], p[i]["val"] + p[i]["unc"])
 
 
-
+    snom = time.time()
     solver = "ipopt"
     m_upper = ConcreteModel()
     m_upper.x = Set(initialize=x.keys())
@@ -289,6 +301,7 @@ def run_fuel_switching_box(percen,epsilon,tag):
     term_con = res.solver.termination_condition
 
     x_opt = value(m_upper.x_v[:])
+    enom = time.time()
 
     x_opt = value(m_upper.x_v[:])
     x_opt_nominal = x_opt
@@ -316,6 +329,7 @@ def run_fuel_switching_box(percen,epsilon,tag):
             return [None]
 
     pool = mp.Pool(mp.cpu_count())
+    spt = []
     while True:
     # for it in range(1):
         x_opt = value(m_upper.x_v[:])
@@ -327,7 +341,10 @@ def run_fuel_switching_box(percen,epsilon,tag):
         #     np.arange(len(con_list)),
         # )
 
+        s_s = time.time()
         res = pool.starmap(solve_subproblem, [(i,x_opt) for i in range(len(con_list))])
+        e_s = time.time()
+        spt.append(e_s-s_s)
         robust = True
         for i in range(len(res)):
             if len(res[i]) > 1:
@@ -348,6 +365,7 @@ def run_fuel_switching_box(percen,epsilon,tag):
             res["nominal_solution"] = nominal_solution
             res["robust_objective"] = value(m_upper.obj)
             res["nominal_objective"] = nominal_obj
+            
             break
         print("Solving upper level problem")
         res = SolverFactory(solver).solve(m_upper)
@@ -363,11 +381,24 @@ def run_fuel_switching_box(percen,epsilon,tag):
             res["robust_objective"] = None
             res["nominal_objective"] = nominal_obj
             break
-    return res 
+    return res,np.mean(np.array(spt)),m_upper,enom-snom
 
 
-tags = ['All Parameters','Learning Rate','Hydrogen Boiler Efficiency','Hydrogen (kgCO2e/MWh)']
-colors = ['k','red','blue','green','orange']
+
+
+# start = time.time()
+# res,spt,m,tnom = run_fuel_switching_box(0.05,1e-4,tag='All Parameters')
+# end = time.time()
+# print('total time: ',end-start)
+# print('av subprobs time: ',spt)
+# print('total end cons: ',len(m.cons))
+# print('nominal time: ',tnom)
+
+
+
+
+tags = ['All Parameters','Learning Rate','Reported Energy Required']
+colors = ['k','red','blue','green']
 fig, axs = plt.subplots(1, 1)
 axs.spines['right'].set_visible(False)
 axs.spines['top'].set_visible(False)
@@ -375,32 +406,33 @@ axs.spines['top'].set_visible(False)
 col_count = 0
 for tag_name in tags:
     n = 20
-    percentages = np.linspace(0.0, 0.2, n)
+    percentages = np.linspace(0.0, 0.3, n)
     rob = np.zeros(n)
     for i in range(n):
         rob[i] = None
     rob[0] = 0 
 
     for i in range(1,n):
-        res = run_fuel_switching_box(percentages[i],1e-4,tag=tag_name)
+        res,subprob_av,m,nominal_time = run_fuel_switching_box(percentages[i],1e-4,tag=tag_name)
         print(res)
         nom = res["nominal_objective"]
         if res["robust_objective"] != None:
             rob[i] = -((res["robust_objective"]/nom)-1)*100
         else:
             break 
-        axs.plot(percentages[:i+1]*100, rob[:i+1], c=colors[col_count], lw=2,label=tag_name)
+        axs.plot(percentages[:i+1]*100, rob[:i+1], c=colors[col_count], lw=2)
         plt.savefig('outputs/box_fuel_switching.png') 
     axs.plot(percentages*100, rob, c=colors[col_count], lw=2,label=tag_name)
     plt.savefig('outputs/box_fuel_switching.pdf') 
     invalid_index = [] 
-    print(rob)
+    #print(rob)
     for i in range(len(percentages)):
         if rob[i] < 0:
             invalid_index.append(i)
     rob = np.delete(rob,invalid_index)
-    print(rob)
+    #print(rob)
     col_count += 1
+
 axs.legend()
 axs.set_xlabel("Parameter uncertainty (%)")
 axs.set_ylabel("Increase in objective from nominal solution (%)")
