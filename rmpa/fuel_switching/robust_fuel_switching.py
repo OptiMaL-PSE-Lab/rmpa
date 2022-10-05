@@ -726,7 +726,6 @@ def run_fuel_switching_ellipse(percen,epsilon,g):
         except ValueError:
             return [None]
 
-    pool = mp.Pool(mp.cpu_count())
     spt = []
     while True:
     # for it in range(1):
@@ -739,9 +738,15 @@ def run_fuel_switching_ellipse(percen,epsilon,g):
         #     np.arange(len(con_list)),
         # )
 
+        # res = []
+        # for i in tqdm(range(len(con_list))):
+        #     res.append(solve_subproblem(i,x_opt,g))
+
+        pool = mp.Pool(mp.cpu_count()-1)
         s_s = time.time()
         res = pool.starmap(solve_subproblem, [(i,x_opt,g) for i in range(len(con_list))])
         e_s = time.time()
+        pool.close()
         spt.append(e_s-s_s)
         robust = True
         for i in range(len(res)):
