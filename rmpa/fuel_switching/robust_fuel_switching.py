@@ -624,8 +624,7 @@ def run_fuel_switching_ellipse(percen,epsilon,g):
         ) = parse_params(p)
         O, S, t = parse_vars(x)
         I = [(E[j] / H_LHV) / 1000 for j in range(boilers)]
-        U = [S[j] * sum(I) for j in range(boilers)]
-        A = A0 + sum(U)
+        A = A0 + sum(I) * sum(S)
         UC = UC0 * (A / A0) ** (-LR)
         return (UC0 - UC) / UC0 - 0.04736
 
@@ -650,8 +649,7 @@ def run_fuel_switching_ellipse(percen,epsilon,g):
         ) = parse_params(p)
         O, S, t = parse_vars(x)
         I = [(E[j] / H_LHV) / 1000 for j in range(boilers)]
-        U = [S[j] * sum(I) for j in range(boilers)]
-        A = A0 + sum(U)
+        A = A0 + sum(S) * sum(I)
         UC = UC0 * (A / A0) ** (-LR)
         return t-(UC0 - UC)
 
@@ -682,6 +680,7 @@ def run_fuel_switching_ellipse(percen,epsilon,g):
     m_upper.cons = ConstraintList()
     for con in con_list:
         m_upper.cons.add(expr=con(x_vars, p_nominal) <= 0)
+        
     m_upper.obj = Objective(expr=obj(x_vars), sense=minimize)
     res = SolverFactory(solver).solve(m_upper)
     nominal_obj = value(m_upper.obj)
@@ -692,15 +691,16 @@ def run_fuel_switching_ellipse(percen,epsilon,g):
 
     x_opt = value(m_upper.x_v[:])
     x_opt_nominal = x_opt
+  
     global solve_subproblem
     def solve_subproblem(j,x_opt,g):
-        print(j)
         con = con_list[j]
         m = ConcreteModel()
         m.p = Set(initialize=p.keys())
         m.p_v = Var(m.p, domain=Reals, bounds=uncertain_bounds)
         param_vars = [m.p_v[str(i)] for i in p.keys()]
         m.obj = Objective(expr=con(x_opt, param_vars), sense=maximize)
+
         upper = [p[str(i)]["val"] + p[i]["unc"] for i in p.keys()]
         lower = [(p[str(i)]["val"] - p[i]["unc"]) for i in p.keys()]
         sum_p = 0 
@@ -713,8 +713,11 @@ def run_fuel_switching_ellipse(percen,epsilon,g):
         m.obj = Objective(expr=con(x_opt, param_vars), sense=maximize)
         try:
             solvern = SolverFactory('ipopt')
+            t = time.time()
             solvern.options['max_iter']= 10000
-            solvern.solve(m)
+            solvern.solve(m,tee=True)
+            print('Solved',j,' in ',time.time()-t,' seconds')
+
             p_opt = value(m.p_v[:])
             for k in range(len(p_opt)):
                 if p_opt[k] is None:
@@ -742,12 +745,15 @@ def run_fuel_switching_ellipse(percen,epsilon,g):
         # for i in tqdm(range(len(con_list))):
         #     res.append(solve_subproblem(i,x_opt,g))
 
+
         pool = mp.Pool(mp.cpu_count()-1)
         s_s = time.time()
         res = pool.starmap(solve_subproblem, [(i,x_opt,g) for i in range(len(con_list))])
         e_s = time.time()
         pool.close()
         spt.append(e_s-s_s)
+
+
         robust = True
         for i in range(len(res)):
             if len(res[i]) > 1:
