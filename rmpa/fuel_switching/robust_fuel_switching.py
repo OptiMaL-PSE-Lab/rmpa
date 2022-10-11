@@ -714,8 +714,11 @@ def run_fuel_switching_ellipse(percen,epsilon,g):
         try:
             solvern = SolverFactory('ipopt')
             t = time.time()
-            solvern.options['max_iter']= 10000
-            solvern.solve(m,tee=True)
+            if j == len(con_list)-1:
+                solvern.options['max_iter']= 100
+            else:
+                solvern.options['max_iter']= 10000
+            solvern.solve(m)
             print('Solved',j,' in ',time.time()-t,' seconds')
 
             p_opt = value(m.p_v[:])
