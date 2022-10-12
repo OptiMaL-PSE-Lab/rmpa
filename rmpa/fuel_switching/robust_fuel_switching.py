@@ -445,24 +445,26 @@ boilers = len(boiler_names)
 def run_fuel_switching_ellipse(percen,epsilon,g):
 
     p = {}
-    p["Natural Gas LHV (MJ/kg)"] = {"val": 42}
-    p["Hydrogen LHV (MJ/kg)"] = {"val": 120}
-    p["Natural Gas Price (£/tonne)"] = {"val": 292}
-    p["Hydrogen Price (£/tonne)"] = {"val": 1800}
-    p["Natural Gas Boiler Efficiency"] = {"val": 0.9}
-    p["Hydrogen Boiler Efficiency"] = {"val": 0.9}
-    p["Natural Gas kgCO2e/MWh"] = {"val": 200}
-    p["Hydrogen (kgCO2e/MWh)"] = {"val": 20}
-    p["A0"] = {"val": 96071.958}
-    p["Learning Rate"] = {"val": 0.07}
-    p["UC0"] = {"val": 1800}
+    p["Natural Gas LHV (MJ/kg)"] = {"val": 47.1,'unc': 6}
+    p["Hydrogen LHV (MJ/kg)"] = {"val": 120,'unc':2}
+    p["Natural Gas Price (£/tonne)"] = {"val": 292,'unc':50}
+    p["Hydrogen Price (£/tonne)"] = {"val": 800,'unc':600}
+    p["Natural Gas Boiler Efficiency"] = {"val": 0.9,'unc':0.06}
+    p["Hydrogen Boiler Efficiency"] = {"val": 0.9,'unc':0.06}
+    p["Natural Gas kgCO2e/MWh"] = {"val": 200,'unc':10}
+    p["Hydrogen (kgCO2e/MWh)"] = {"val": 20,'unc':5}
+    p["A0"] = {"val": 96071.958,'unc':0.01}
+    p["Learning Rate"] = {"val": 0.07,'unc':0.05}
+    p["UC0"] = {"val": 800,'unc':600}
     for i in range(boilers):
         p[boiler_names[i] + ": Thermal Energy required from fuel (MJ/year)"] = {
-            "val": boiler_energy_required[i]
+            "val": boiler_energy_required[i],
+            'unc': boiler_energy_required[i] * 0.05
         }
 
-    for k,v in p.items():
-        p[k]['unc'] = p[k]['val'] * percen
+    if percen != 0:
+        for k,v in p.items():
+            p[k]['unc'] = p[k]['val'] * percen
 
 
     x = {}
@@ -739,21 +741,21 @@ def run_fuel_switching_ellipse(percen,epsilon,g):
         robust = True
         max_con = -1e30
 
+        s_s = time.time()
         # res = pool.map(
         #     solve_subproblem,
         #     np.arange(len(con_list)),
         # )
 
-        # res = []
-        # for i in tqdm(range(len(con_list))):
-        #     res.append(solve_subproblem(i,x_opt,g))
+        res = []
+        for i in tqdm(range(len(con_list))):
+            res.append(solve_subproblem(i,x_opt,g))
 
 
-        pool = mp.Pool(mp.cpu_count()-1)
-        s_s = time.time()
-        res = pool.starmap(solve_subproblem, [(i,x_opt,g) for i in range(len(con_list))])
+        # pool = mp.Pool(mp.cpu_count())
+        # res = pool.starmap(solve_subproblem, [(i,x_opt,g) for i in range(len(con_list))])
+
         e_s = time.time()
-        pool.close()
         spt.append(e_s-s_s)
 
 
@@ -764,6 +766,7 @@ def run_fuel_switching_ellipse(percen,epsilon,g):
                 con = con_list[i]
                 m_upper.cons.add(expr=con(x_vars, res[i][1]) <= 0)
 
+        # pool.close()
 
         if robust is True:
             res = {}
@@ -838,14 +841,50 @@ for i in range(per):
         else:
             break 
         axs.plot(prob[:j+1], rob[:j+1], c=colors[col_count], lw=2)
-        plt.savefig('outputs/ellipse_fuel_switching.png') 
+        plt.savefig('outputs/ellipse_fuel_switching_all.png') 
     label = "% Uncertainty: " + str(100*np.round(percentages[i], 2))
     axs.plot(prob, rob, c=colors[col_count], lw=2,label=label)
-    plt.savefig('outputs/ellipse_fuel_switching.pdf') 
+    plt.savefig('outputs/ellipse_fuel_switching_all.pdf') 
     col_count += 1
 axs.set_xlabel("Constraint violation probability (%)")
 axs.set_ylabel("Increase in objective from nominal solution (%)")
 axs.grid()
 axs.set_xscale("log")
 axs.legend()
-fig.savefig("outputs/ellipse_fuel_switching_prob.pdf")
+fig.savefig("outputs/ellipse_fuel_switching_prob_all.pdf")
+
+
+# colors = ['k']
+# fig, axs = plt.subplots(1, 1)
+# axs.spines["right"].set_visible(False)
+# axs.spines["top"].set_visible(False)
+# axs.set_title("Fuel Switching - Ellipse")
+# axs.set_xlabel("Constraint violation probability (%)")
+# axs.set_ylabel("Increase in objective from nominal solution (%)")
+# axs.grid()
+# axs.set_xscale("log")
+# col_count = 0
+# n = 20
+# gamma = np.linspace(0, 5, n)
+# prob = [(np.exp(-(gamma[i]**2)/2))*100 for i in range(len(gamma))]
+# rob = np.zeros(n)
+# for k in range(n):
+#     rob[k] = None
+# rob[0] = 0 
+# for j in range(1,n):
+#     res,sp_av,m,t_nom = run_fuel_switching_ellipse(0, 1e-6, gamma[j])
+#     nom = res["nominal_objective"]
+#     rob[j] = res["robust_objective"]
+#     if res["robust_objective"] != None:
+#         rob[j] = -((res["robust_objective"]/nom)-1)*100
+#     else:
+#         break 
+#     axs.plot(prob[:j+1], rob[:j+1], c=colors[col_count], lw=2)
+#     plt.savefig('outputs/ellipse_fuel_switching_real.png') 
+# axs.plot(prob, rob, c=colors[col_count], lw=2)
+# plt.savefig('outputs/ellipse_fuel_switching_real.pdf') 
+# axs.set_xlabel("Constraint violation probability (%)")
+# axs.set_ylabel("Increase in objective from nominal solution (%)")
+# axs.grid()
+# axs.set_xscale("log")
+# fig.savefig("outputs/ellipse_fuel_switching_prob_real.pdf")

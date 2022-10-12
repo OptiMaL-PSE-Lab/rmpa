@@ -4,7 +4,7 @@
 #PBS -o outputs/ellipse.out
 #PBS -e outputs/ellipse.err
 #PBS -lselect=1:ncpus=64:mem=64gb
-#PBS -lwalltime=12:00:00
+#PBS -lwalltime=48:00:00
 
 module load ipopt
 module load anaconda3/personal
