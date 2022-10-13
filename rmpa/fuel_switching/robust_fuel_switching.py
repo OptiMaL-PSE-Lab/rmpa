@@ -34,7 +34,7 @@ This code was created by Tom Savage 13/10/2022
 For help email trs20@ic.ac.uk or ring 07446880063. 
 '''
 
-def run_fuel_switching_ellipse(percentage, epsilon, g):
+def run_fuel_switching(percentage, epsilon, g,tag,ellipse):
     # path where data of multiple parameters lives
     data_path = "data/example_data.csv"
     data = pd.read_csv(data_path)
@@ -50,37 +50,40 @@ def run_fuel_switching_ellipse(percentage, epsilon, g):
 
     # if all_percentage is 'True', given uncertainties are disregarded
     # and they are all given a base percentage 
-    all_percentage = True
 
     p = {}
     # parameters that appear in the problem must be in this format
-    p["Natural Gas LHV (MJ/kg)"] = {"val": 42,'unc':5}
-    p["Hydrogen LHV (MJ/kg)"]    = {"val": 120,'unc':10}
-    p["Natural Gas Price (£/tonne)"] = {"val": 292,'unc':20}
-    p["Hydrogen Price (£/tonne)"]    = {"val": 1800,'unc':20}
-    p["Natural Gas Boiler Efficiency"] = {"val": 0.9,'unc':0.05}
-    p["Hydrogen Boiler Efficiency"] = {"val": 0.9,'unc':0.05}
-    p["Natural Gas kgCO2e/MWh"] = {"val": 200,'unc':5}
-    p["Hydrogen (kgCO2e/MWh)"] = {"val": 20,'unc':3}
-    p["A0"] = {"val": 96071.958,'unc':100}
-    p["Learning Rate"] = {"val": 0.07,'unc':0.01}
-    p["UC0"] = {"val": 1800,'unc':20}
+    p["Natural Gas LHV (MJ/kg)"] = {"val": 42}
+    p["Hydrogen LHV (MJ/kg)"]    = {"val": 120}
+    p["Natural Gas Price (£/tonne)"] = {"val": 292}
+    p["Hydrogen Price (£/tonne)"]    = {"val": 1800}
+    p["Natural Gas Boiler Efficiency"] = {"val": 0.9}
+    p["Hydrogen Boiler Efficiency"] = {"val": 0.9}
+    p["Natural Gas kgCO2e/MWh"] = {"val": 200}
+    p["Hydrogen (kgCO2e/MWh)"] = {"val": 20}
+    p["A0"] = {"val": 96071.958}
+    p["Learning Rate"] = {"val": 0.07}
+    p["UC0"] = {"val": 1800}
 
     # here we iteratively create parameters from the list of energies imported earlier
     for i in range(boilers):
         p[boiler_names[i] + ": Thermal Energy required from fuel (MJ/year)"] = {
-            "val": boiler_energy_required[i],'unc': boiler_energy_required[i] * 0.05
-        }
+            "val": boiler_energy_required[i]}
 
     # iteratively define the uncertainty to be a percentage, or just keep 
     # the value if it already exists
     for k, v in p.items():
-        try:
-            key_test = p[k]['unc']
-        except KeyError:
+        p[k]['unc'] = 0 
+        if tag == 'All Parameters':
             p[k]["unc"] = p[k]["val"] * percentage_uncertainty / 100
-        if all_percentage is True or percentage != 0:
-            p[k]["unc"] = p[k]["val"] * percentage_uncertainty / 100
+        elif tag == 'Reported Energy Required':
+            if 'Thermal Energy' in k:
+                p[k]["unc"] = p[k]["val"] * percentage_uncertainty / 100
+        else:
+            p[tag]['unc'] =  p[tag]["val"] * percentage_uncertainty / 100
+
+
+    
     # Assign decision variables here. 
     # The name of each variable is prepended with the name of the boiler and each
     # is associated with upper and lower bounds
@@ -198,16 +201,16 @@ def run_fuel_switching_ellipse(percentage, epsilon, g):
         m.p = Set(initialize=p.keys())
         m.p_v = Var(m.p, domain=Reals, bounds=uncertain_bounds)
 
-        upper = [p[str(i)]["val"] + p[i]["unc"] for i in p.keys()]
-        lower = [(p[str(i)]["val"] - p[i]["unc"]) for i in p.keys()]
-        sum_p = 0 
-        param_vars = [m.p_v[str(i)] for i in p.keys()]
-        for i in range(len(param_vars)):
-            if upper[i]-lower[i] > 1e-20:
-                p_n = (((param_vars[i]-lower[i])/(upper[i]-lower[i]))*2)-1
-                sum_p += p_n**2 
-        m.ellipse = Constraint(expr= sum_p <= g**2)
-
+        if ellipse is True:
+            upper = [p[str(i)]["val"] + p[i]["unc"] for i in p.keys()]
+            lower = [(p[str(i)]["val"] - p[i]["unc"]) for i in p.keys()]
+            sum_p = 0 
+            param_vars = [m.p_v[str(i)] for i in p.keys()]
+            for i in range(len(param_vars)):
+                if upper[i]-lower[i] > 1e-20:
+                    p_n = (((param_vars[i]-lower[i])/(upper[i]-lower[i]))*2)-1
+                    sum_p += p_n**2 
+            m.ellipse = Constraint(expr= sum_p <= g**2)
 
         m.obj = Objective(expr=con(x_opt, m.p_v), sense=maximize)
         try:
@@ -287,6 +290,42 @@ def run_fuel_switching_ellipse(percentage, epsilon, g):
 
     return res
 
+tags = ['All Parameters','Learning Rate','Reported Energy Required']
+colors = ['k','red','blue','green']
+fig, axs = plt.subplots(1, 1)
+axs.spines['right'].set_visible(False)
+axs.spines['top'].set_visible(False)
+#axs.set_title("Iron and Steel - Cartesian Product of Intervals")
+col_count = 0
+for tag_name in tags:
+    n = 50
+    percentages = np.linspace(0.0001, 0.2, n)
+    rob = np.zeros(n)
+    for i in range(n):
+        res = run_fuel_switching(percentages[i],1e-4,None,tag=tag_name,ellipse=False)
+        nom = res["nominal_objective"]
+        rob[i] = res["robust_objective"]
+        print(nom,rob[i])
+    rob = np.array([0]+list(np.cumsum(np.diff(rob))/rob[0]))*100
+    axs.plot(percentages*100, rob, c=colors[col_count], lw=2,label=tag_name)
+    plt.savefig('outputs/box_fuel_switching.pdf') 
+    invalid_index = [] 
+    print(rob)
+    for i in range(len(percentages)):
+        if rob[i] < 0:
+            invalid_index.append(i)
+
+
+    rob = np.delete(rob,invalid_index)
+    print(rob)
+    col_count += 1
+axs.legend()
+axs.set_xlabel("Parameter uncertainty (%)")
+axs.set_ylabel("Increase in objective from nominal solution (%)")
+axs.grid()
+plt.savefig('outputs/box_iron_and_steel.pdf')
+
+
 
 colors = ["k", "red", "blue", "green"]
 fig, axs = plt.subplots(1, 1)
@@ -309,7 +348,7 @@ for i in range(per):
         rob[k] = None
     rob[0] = 0 
     for j in range(1,n):
-        res = run_fuel_switching_ellipse(percentages[i], 1e-4, gamma[j])
+        res = run_fuel_switching(percentages[i], 1e-4, gamma[j],tag='All Parameters',ellipse=True)
         nom = res["nominal_objective"]
         rob[j] = res["robust_objective"]
         print('Nominal: ',nom,' Robust: ',rob[j],'\n')
@@ -318,50 +357,50 @@ for i in range(per):
         else:
             break 
         axs.plot(prob[:j+1], rob[:j+1], c=colors[col_count], lw=2)
-        plt.savefig('outputs/ellipse_fuel_switching_all.png') 
+        plt.savefig('outputs/ellipse_fuel_switching.png') 
     label = "% Uncertainty: " + str(100*np.round(percentages[i], 2))
     axs.plot(prob, rob, c=colors[col_count], lw=2,label=label)
-    plt.savefig('outputs/ellipse_fuel_switching_all.pdf') 
+    plt.savefig('outputs/ellipse_fuel_switching.pdf') 
     col_count += 1
 axs.set_xlabel("Constraint violation probability (%)")
 axs.set_ylabel("Increase in objective from nominal solution (%)")
 axs.grid()
 axs.set_xscale("log")
 axs.legend()
-fig.savefig("outputs/ellipse_fuel_switching_prob_all.pdf")
+fig.savefig("outputs/ellipse_fuel_switching_prob.pdf")
 
 
-# colors = ['k']
-# fig, axs = plt.subplots(1, 1)
-# axs.spines["right"].set_visible(False)
-# axs.spines["top"].set_visible(False)
-# axs.set_title("Fuel Switching - Ellipse")
-# axs.set_xlabel("Constraint violation probability (%)")
-# axs.set_ylabel("Increase in objective from nominal solution (%)")
-# axs.grid()
-# axs.set_xscale("log")
-# col_count = 0
-# n = 20
-# gamma = np.linspace(0, 5, n)
-# prob = [(np.exp(-(gamma[i]**2)/2))*100 for i in range(len(gamma))]
-# rob = np.zeros(n)
-# for k in range(n):
-#     rob[k] = None
-# rob[0] = 0 
-# for j in range(1,n):
-#     res,sp_av,m,t_nom = run_fuel_switching_ellipse(0, 1e-4, gamma[j])
-#     nom = res["nominal_objective"]
-#     rob[j] = res["robust_objective"]
-#     if res["robust_objective"] != None:
-#         rob[j] = -((res["robust_objective"]/nom)-1)*100
-#     else:
-#         break 
-#     axs.plot(prob[:j+1], rob[:j+1], c=colors[col_count], lw=2)
-#     plt.savefig('outputs/ellipse_fuel_switching_real.png') 
-# axs.plot(prob, rob, c=colors[col_count], lw=2)
-# plt.savefig('outputs/ellipse_fuel_switching_real.pdf') 
-# axs.set_xlabel("Constraint violation probability (%)")
-# axs.set_ylabel("Increase in objective from nominal solution (%)")
-# axs.grid()
-# axs.set_xscale("log")
-# fig.savefig("outputs/ellipse_fuel_switching_prob_real.pdf")
+# # colors = ['k']
+# # fig, axs = plt.subplots(1, 1)
+# # axs.spines["right"].set_visible(False)
+# # axs.spines["top"].set_visible(False)
+# # axs.set_title("Fuel Switching - Ellipse")
+# # axs.set_xlabel("Constraint violation probability (%)")
+# # axs.set_ylabel("Increase in objective from nominal solution (%)")
+# # axs.grid()
+# # axs.set_xscale("log")
+# # col_count = 0
+# # n = 20
+# # gamma = np.linspace(0, 5, n)
+# # prob = [(np.exp(-(gamma[i]**2)/2))*100 for i in range(len(gamma))]
+# # rob = np.zeros(n)
+# # for k in range(n):
+# #     rob[k] = None
+# # rob[0] = 0 
+# # for j in range(1,n):
+# #     res,sp_av,m,t_nom = run_fuel_switching_ellipse(0, 1e-4, gamma[j])
+# #     nom = res["nominal_objective"]
+# #     rob[j] = res["robust_objective"]
+# #     if res["robust_objective"] != None:
+# #         rob[j] = -((res["robust_objective"]/nom)-1)*100
+# #     else:
+# #         break 
+# #     axs.plot(prob[:j+1], rob[:j+1], c=colors[col_count], lw=2)
+# #     plt.savefig('outputs/ellipse_fuel_switching_real.png') 
+# # axs.plot(prob, rob, c=colors[col_count], lw=2)
+# # plt.savefig('outputs/ellipse_fuel_switching_real.pdf') 
+# # axs.set_xlabel("Constraint violation probability (%)")
+# # axs.set_ylabel("Increase in objective from nominal solution (%)")
+# # axs.grid()
+# # axs.set_xscale("log")
+# # fig.savefig("outputs/ellipse_fuel_switching_prob_real.pdf")
