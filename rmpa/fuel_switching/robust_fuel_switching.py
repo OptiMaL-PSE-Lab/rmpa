@@ -79,7 +79,7 @@ def run_fuel_switching_ellipse(percentage, epsilon, g):
             key_test = p[k]['unc']
         except KeyError:
             p[k]["unc"] = p[k]["val"] * percentage_uncertainty / 100
-        if all_percentage is True:
+        if all_percentage is True or percentage != 0:
             p[k]["unc"] = p[k]["val"] * percentage_uncertainty / 100
     # Assign decision variables here. 
     # The name of each variable is prepended with the name of the boiler and each
@@ -349,7 +349,7 @@ fig.savefig("outputs/ellipse_fuel_switching_prob_all.pdf")
 #     rob[k] = None
 # rob[0] = 0 
 # for j in range(1,n):
-#     res,sp_av,m,t_nom = run_fuel_switching_ellipse(0, 1e-6, gamma[j])
+#     res,sp_av,m,t_nom = run_fuel_switching_ellipse(0, 1e-4, gamma[j])
 #     nom = res["nominal_objective"]
 #     rob[j] = res["robust_objective"]
 #     if res["robust_objective"] != None:
