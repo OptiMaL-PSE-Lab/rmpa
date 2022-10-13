@@ -1,5 +1,5 @@
 <a href="https://www.imperial.ac.uk/optimisation-and-machine-learning-for-process-engineering/about-us/">
-<img src="https://avatars.githubusercontent.com/u/81195336?s=200&v=4" alt="Optimal PSE logo" title="OptimalPSE" align="right" height="150" />
+<img src="https://github.com/OptiMaL-PSE-Lab/logo/blob/main/PNG/optiml_light_short.png?raw=true" alt="Optimal PSE logo" title="OptimalPSE" align="right" height="150" />
 </a>
 
 ## Robust Market Potential Assessment
