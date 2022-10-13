@@ -37,11 +37,9 @@ For help email trs20@ic.ac.uk or ring 07446880063.
 def run_fuel_switching_ellipse(percentage, epsilon, g):
     # path where data of multiple parameters lives
     data_path = "data/example_data.csv"
-    n_data = 50 
-    data = pd.read_csv(data_path,nrows=n_data)
+    data = pd.read_csv(data_path)
     boiler_names = data['Technology'].values
     boiler_energy_required = data['Thermal Energy required from fuel (MJ/year)'].values
-    boiler_energy_required = np.random.uniform(8000000,10000000,n_data)
     boilers = len(boiler_names)
 
     # NOTE 
@@ -208,7 +206,7 @@ def run_fuel_switching_ellipse(percentage, epsilon, g):
             if upper[i]-lower[i] > 1e-20:
                 p_n = (((param_vars[i]-lower[i])/(upper[i]-lower[i]))*2)-1
                 sum_p += p_n**2 
-        m.ellipse = Constraint(expr= sqrt(sum_p) <= g)
+        m.ellipse = Constraint(expr= sum_p <= g**2)
 
 
         m.obj = Objective(expr=con(x_opt, m.p_v), sense=maximize)
@@ -299,7 +297,6 @@ axs.set_xlabel("Constraint violation probability (%)")
 axs.set_ylabel("Increase in objective from nominal solution (%)")
 axs.grid()
 axs.set_xscale("log")
-axs.legend()
 col_count = 0
 n = 20
 per = 4
