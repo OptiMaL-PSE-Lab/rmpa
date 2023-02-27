@@ -442,7 +442,7 @@ boilers = len(boiler_names)
 # plt.savefig('outputs/box_fuel_switching.pdf')
 
 
-def run_fuel_switching_ellipse(percen,epsilon,g):
+def run_fuel_switching_ellipse(percen,epsilon,g,limit):
 
     p = {}
     p["Natural Gas LHV (MJ/kg)"] = {"val": 47.1,'unc': 6}
@@ -628,7 +628,7 @@ def run_fuel_switching_ellipse(percen,epsilon,g):
         I = [(E[j] / H_LHV) / 1000 for j in range(boilers)]
         A = A0 + sum(I) * sum(S)
         UC = UC0 * (A / A0) ** (-LR)
-        return (UC0 - UC) / UC0 - 0.04736
+        return (UC0 - UC) / UC0 - limit
 
 
     con_list += [c]
@@ -802,19 +802,32 @@ def run_fuel_switching_ellipse(percen,epsilon,g):
 
 
 
-start = time.time()
-prob = 0.01
-gamma = np.sqrt(-2*np.log(prob/100))
-res,spt,m,tnom = run_fuel_switching_ellipse(0.05,1e-4,gamma)
+values = [0.005,0.01,0.015,0.02,0.025,0.03,0.035,0.04,0.045,0.05]
+#values = list(np.linspace(0,1,11))
+for val in values:
+    start = time.time()
+    prob = 0.01
+    gamma = np.sqrt(-2*np.log(prob/100))
+    res,spt,m,tnom = run_fuel_switching_ellipse(0.05,1e-4,gamma,val)
 
+    end = time.time()
+    print('total time: ',end-start)
+    print('av subprobs time: ',spt)
+    print('total end cons: ',len(m.cons))
+    print('nominal time: ',tnom)
 
-end = time.time()
-print('total time: ',end-start)
-print('av subprobs time: ',spt)
-print('total end cons: ',len(m.cons))
-print('nominal time: ',tnom)
+    sol = list(res['robust_solution'].values())[1:]
+    incentive = sol[:int(len(sol)/2)]
+    market_share = sol[int(len(sol)/2):]
+    df = {'incentive':incentive,'market share':market_share}
+    df = pd.DataFrame(df)
+    df.to_csv('outputs/res_'+str(val)+'.csv')
 
-
+writer = pd.ExcelWriter('outputs/overall_res.xlsx') # Arbitrary output name
+for csvfilename in ['outputs/res_'+str(val)+'.csv' for val in values]:
+    df = pd.read_csv(csvfilename)
+    df.to_excel(writer,sheet_name=val)
+writer.save()
 
 # colors = ["k", "red", "blue", "green"]
 # fig, axs = plt.subplots(1, 1)

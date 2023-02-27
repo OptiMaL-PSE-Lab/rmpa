@@ -5,3 +5,7 @@ paper/
 __pycache__
 */.DS_Store
 outputs/
+docs/
+.flake8
+.pre-commit-config.yaml
+*pbs
